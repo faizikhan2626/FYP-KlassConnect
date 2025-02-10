@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Confirmation</title>
+  <style>
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #007013;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    ul{
+      background-color: black;
+    }
+    ul>span{
+      color: #007013;
+    }
+
+    .container {
+      max-width: 600px;
+      background: #ffffff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.15);
+      text-align: center;
+    }
+
+
+    .header {
+      background: linear-gradient(135deg, #007013, #0000);
+      color: #fff;
+      padding: 15px;
+      border-radius: 10px 10px 0 0;
+    }
+    
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+
+    .order-details {
+      background-color: black;
+      padding: 20px;
+      text-align: left;
+    }
+    
+    .order-details h2 {
+      margin-bottom: 15px;
+      color: white;
+      font-size: 20px;
+      border-bottom: 2px solid #007013;
+      display: inline-block;
+      padding-bottom: 5px;
+    }
+
+    .order-details ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .order-details li {
+      background: #0000;
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 16px;
+      color: white;
+      font-weight: 500;
+    }
+
+    .order-details li span {
+      font-weight: 600;
+      color: white;
+    }
+
+  
+    .footer {
+      background: linear-gradient(135deg, #007013, #0000);
+      color: white;
+      padding: 12px;
+      border-radius: 0 0 10px 10px;
+      font-size: 14px;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Your <i><b>KlassConnect</b></i> Order is Confirmed 🎉</h1>
+    </div>
+    <div class="order-details">
+      <h2>Order Summary</h2>
+      <ul>
+        <li><span>Order ID:</span> <%= order._id %></li>
+        <li><span>Course Name:</span> <%= order.name %></li>
+        <li><span>Price:</span> $<%= order.price %></li>
+        <li><span>Date:</span> <%= order.date %></li>
+      </ul>
+    </div>
+    <div class="footer">
+      <p>Thank you for your purchase! 🚀</p>
+    </div>
+  </div>
+</body>
+</html>

@@ -6,7 +6,6 @@ export const ErrorMiddleware = (err: any, req: Request, res: Response, next: Nex
     err.message = err.message || 'Internal Server Error';
 
     //wrong MongoDB id
-
     if (err.name === 'CastError') {
         const message = `Recourse not Found. Invalid ${err.path}`;
         err = new ErrorHandler(message, 400);
