@@ -205,10 +205,7 @@ export const updateAccessToken = CatchAsyncError(async (req: Request, res: Respo
         res.cookie("refresh_token", refreshToken, refreshTokenOptions)
 
         await redis.set(user._id, JSON.stringify(user),"EX",604800);  //7 days
-        res.status(200).json({
-            status: "success",
-            accessToken,
-        })
+        next();
 
     } catch (error: any) {
         return next(new ErrorHandler(error.message, 400));
@@ -258,29 +255,21 @@ interface IUpdateUserInfo {
 
 export const updateUserInfo = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { name, email } = req.body as IUpdateUserInfo;
+        const { name } = req.body as IUpdateUserInfo;
         const userId = req.user?._id as string;
-        const user = await userModel.findOne({ userId });
-        if (email && user) {
-            const isEmailExist = await userModel.findOne({ email });
-            if (isEmailExist) {
-                return next(new ErrorHandler("Email Already exists", 400));
-            }
-            user.email = email;
-        }
+        const user = await userModel.findById(userId);
+        
+        if (!user) return next(new ErrorHandler("User not found", 404));
 
-        if (name && user) {
-            user.name = name;
-        }
-        await user?.save();
+        if (name) user.name = name;
+        await user.save();
 
         await redis.set(userId, JSON.stringify(user));
 
         res.status(201).json({
             success: true,
             user,
-        })
-
+        });
     } catch (error: any) {
         return next(new ErrorHandler(error.message, 400));
     }
@@ -323,54 +312,56 @@ export const updatePassword = CatchAsyncError(async (req: Request, res: Response
 
 //Update Profile Picture
 interface IUpdateProilePicture {
-    avatar: string
+    avatar: string;
 }
 
 export const updateProfilePicture = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
     try {
-
         const { avatar } = req.body;
         const userId = req?.user?._id;
         const user = await userModel.findById(userId);
-        if (avatar && user) {
-            //if user have an avatar
-            if (user?.avatar?.public_id) {
-                //first delete old image
-                await cloudinary.v2.uploader.destroy(user?.avatar?.public_id);
 
-                const myCloud = await cloudinary.v2.uploader.upload(avatar, {
-                    older: "avatars",
-                    width: 150
-                });
-                user.avatar = {
-                    public_id: myCloud.public_id,
-                    url: myCloud.secure_url
-                }
-            }
-            else {
-                const myCloud = await cloudinary.v2.uploader.upload(avatar, {
-                    older: "avatars",
-                    width: 150
-                });
-                user.avatar = {
-                    public_id: myCloud.public_id,
-                    url: myCloud.secure_url
-                }
-
-            }
-
+        if (!avatar) {
+            return res.status(400).json({ success: false, message: "Avatar is required" });
         }
-        await user?.save();
+
+        if (typeof avatar !== "string" || !avatar.startsWith("data:image")) {
+            return res.status(400).json({ success: false, message: "Invalid avatar format" });
+        }
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        if (user.avatar?.public_id) {
+            await cloudinary.v2.uploader.destroy(user.avatar.public_id);
+        }
+
+        // Upload the new avatar
+        const myCloud = await cloudinary.v2.uploader.upload(avatar, {
+            folder: "avatars", 
+            width: 150
+        });
+
+        // 🔴 Update user's avatar
+        user.avatar = {
+            public_id: myCloud.public_id,
+            url: myCloud.secure_url
+        };
+
+        await user.save();
         await redis.set(userId as string, JSON.stringify(user));
+
         res.status(200).json({
             success: true,
             user
-        })
+        });
 
     } catch (error: any) {
         return next(new ErrorHandler(error.message, 400));
     }
-})
+});
+
 
 //Get all users --Admin only
 export const getAllUsers = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {

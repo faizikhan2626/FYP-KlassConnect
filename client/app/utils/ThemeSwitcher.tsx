@@ -11,7 +11,7 @@ export const ThemeSwitcher = () => {
     setMounted(true);
   }, []);
 
-  if (!mounted) return null; // Ensure no hydration issues
+  if (!mounted) return null;
 
   return (
     <div className="flex items-center justify-center mx-4">

@@ -10,6 +10,7 @@ import ejs from "ejs";
 import path from "path";
 import sendMail from "../utils/sendMail";
 import NotificationModel from "../models/notificationModel";
+import axios from "axios";
 
 //upload course
 export const uploadCourse = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
@@ -106,27 +107,14 @@ export const getSingleCourse = CatchAsyncError(async (req: Request, res: Respons
 
 export const getAllCourses = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const isCacheExist = await redis.get("allCourses");
-        if (isCacheExist) {
-            const courses = JSON.parse(isCacheExist);
-
-            res.status(200).json({
-                success: true,
-                courses,
-            })
-        }
-        else {
+       
             const courses = await CourseModel.find().select(
                 "-courseData.videoUrl -courseData.suggestion -courseData.questions -courseData.links"
             );
-
-            await redis.set("allCourses", JSON.stringify(courses));
-
-            res.status(200).json({
+         res.status(200).json({
                 success: true,
                 courses,
             })
-        }
 
     } catch (error: any) {
         return next(new ErrorHandler(error.message, 500))
@@ -413,3 +401,25 @@ export const deleteCourse = CatchAsyncError(async (req: Request, res: Response, 
         return next(new ErrorHandler(error.message, 400));
     }
     })
+
+//Generate Video Url
+export const generateVideoUrl = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { videoId } = req.body; 
+        const response = await axios.post(
+            `https://dev.vdocipher.com/api/videos/${videoId}/otp`,
+            { ttl: 300 },
+            {
+                headers: {
+                    Accept: 'application/json',
+                   'Content-Type': 'application/json',
+                    Authorization: `Apisecret ${process.env.VDOCIPHER_API_SECRET}`,
+                },
+            }
+        );
+
+        res.json(response.data);
+    } catch (error: any) {
+        return next(new ErrorHandler(error.message, 400)); 
+    }
+});

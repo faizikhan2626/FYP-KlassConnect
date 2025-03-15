@@ -88,7 +88,7 @@ const courseSchema = new Schema<ICourse>({
          type: String, 
          required: true
          },
-    desciption: {
+    description: {
          type: String, 
          required: true
          },
