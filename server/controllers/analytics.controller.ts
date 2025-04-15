@@ -25,12 +25,12 @@ export const getUsersAnalytics = CatchAsyncError(async (req:Request,res:Response
 //Get Courses Analytics --Admin only
 export const getCoursesAnalytics = CatchAsyncError(async (req:Request,res:Response,next:NextFunction)=>{
     try {
-        const Courses = await generateLast12MonthsData(CourseModel);
+        const courses = await generateLast12MonthsData(CourseModel);
 
 
         res.status(200).json({
             success:true,
-            Courses
+            courses
         });
     } catch (error:any) {
         next(new ErrorHandler(error.message,500));

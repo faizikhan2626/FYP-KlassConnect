@@ -5,7 +5,10 @@ import React, { FC, useState } from "react";
 import Heading from "./utils/Heading";
 import Header from "./components/Header";
 import Hero from "./components/Routes/Hero";
-
+import Courses from "./components/Routes/Courses";
+import Reviews from "./components/Routes/Reviews";
+import FAQ from "./components/FAQ/FAQ";
+import Footer from "./components/Footer";
 interface Props {}
 
 const Page: FC<Props> = (props) => {
@@ -14,7 +17,7 @@ const Page: FC<Props> = (props) => {
   const [route, setRoute] = useState("Login");
 
   return (
-    <div>
+    <div className="h-full">
       <Heading
         title="KlassConnect"
         description="KlassConnect is a Learning platform for students to learn and get Help from experts"
@@ -28,6 +31,10 @@ const Page: FC<Props> = (props) => {
         setRoute={setRoute}
       />
       <Hero />
+      <Courses />
+      <Reviews />
+      <FAQ />
+      <Footer />
     </div>
   );
 };

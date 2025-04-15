@@ -18,7 +18,7 @@ const CreateCourse = (props: Props) => {
   useEffect(() => {
     if (isSuccess) {
       toast.success("Course created successfully!");
-      redirect("/admin/all-courses");
+      redirect("/admin/courses");
     }
     if (error) {
       if ("data" in error) {
@@ -35,9 +35,11 @@ const CreateCourse = (props: Props) => {
     estimatedPrice: "",
     tags: "",
     level: "",
+    categories: "",
     demoUrl: "",
     thumbnail: "",
   });
+
   const handleSubmit = async () => {
     //format benefirs array
     const formattedBenefits = benefits.map((benefit) => ({
@@ -50,17 +52,21 @@ const CreateCourse = (props: Props) => {
     //format courseContentData array
     const formattedCourseContentData = courseContentData.map(
       (courseContent) => ({
-        videoUrl: courseContent.videoUrl,
-        title: courseContent.title,
-        description: courseContent.description,
-        videoSection: courseContent.videoSection,
-        links: courseContent.links.map((link) => ({
-          title: link.title,
-          url: link.url,
-        })),
-        suggestions: courseContent.suggestions,
+        videoUrl: courseContent.videoUrl || "", // ✅ Prevents undefined
+        title: courseContent.title || "Untitled",
+        description: courseContent.description || "No description",
+        videoLength: courseContent.videoLength || "",
+        videoSection: courseContent.videoSection || "Untitled Section",
+        links:
+          courseContent.links?.map((link) => ({
+            title: link.title || "No title",
+            url: link.url || "#", // ✅ Default URL to prevent errors
+            description: link.description || "No description",
+          })) || [],
+        suggestions: courseContent.suggestions || "",
       })
     );
+
     //format our object
     const data = {
       name: courseInfo.name,
@@ -73,7 +79,7 @@ const CreateCourse = (props: Props) => {
       thumbnail: courseInfo.thumbnail,
       benefits: formattedBenefits,
       prerequisites: formattedPrerequisites,
-      courseContentData: formattedCourseContentData,
+      courseData: formattedCourseContentData,
     };
     setCourseData(data);
   };
@@ -91,18 +97,20 @@ const CreateCourse = (props: Props) => {
       videoUrl: "",
       title: "",
       description: "",
+      videoLength: "",
       videoSection: "Untitled Section",
       links: [
         {
           title: "",
           url: "",
+          description: "",
         },
       ],
       suggestions: "",
     },
   ]);
   const [courseData, setCourseData] = useState({});
-
+  console.log(courseData);
   return (
     <div className="w-full flex min-h-screen">
       <div className="w-[80%]">
