@@ -4,11 +4,19 @@ import Link from "next/link";
 export const navItemsData = [
   {
     name: "Home",
-    url: "/", // Path to the page
+    url: "/",
   },
   {
     name: "Courses",
     url: "/courses",
+  },
+  {
+    name: "Ai Quiz",
+    url: "/quiz",
+  },
+  {
+    name: "Ai Assignment",
+    url: "/assignment",
   },
   {
     name: "About",
@@ -16,11 +24,11 @@ export const navItemsData = [
   },
   {
     name: "Policy",
-    url: "/policy",
+    url: "/privacy",
   },
   {
     name: "FAQ",
-    url: "/faq",
+    url: "faq",
   },
 ];
 

@@ -9,12 +9,25 @@ import ejs, { name } from "ejs";
 import sendMail from "../utils/sendMail";
 import NotificationModel from "../models/notificationModel";
 import { getAllOrdersServices, newOrder } from "../services/order.service";
-
+import { redis } from "../utils/redis";
+require ("dotenv").config();
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 //create Order
 export const createOrder = CatchAsyncError(async (req:Request,res:Response,next:NextFunction)=>{
     try {
         const {courseId,payment_info  } = req.body;
+
+        if(payment_info){
+            if("id" in payment_info){
+              const paymentIntentId = payment_info.id;
+              const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+              if(paymentIntent.status !== "succeeded"){
+                return next(new ErrorHandler("Payment unauthorized", 400));
+              }
+            }
+        }
+
     const user = await userModel.findById(req.user?._id);
     const courseExistInUser   = (user?.courses as { courseId: string }[]).some((course) => course.courseId === courseId);
 
@@ -63,6 +76,8 @@ export const createOrder = CatchAsyncError(async (req:Request,res:Response,next:
         
     }
     user?.courses.push({ courseId: course._id as string });
+    await redis.set(req.user?._id as string, JSON.stringify(user));
+
     await user?.save();
     const notification = await NotificationModel.create({
         user:user?._id,
@@ -92,4 +107,38 @@ export const getAllOrders = CatchAsyncError(async (req: Request, res: Response, 
     } catch (error: any) {
         return next(new ErrorHandler(error.message, 400));
     }
+})
+
+// Sending Stripe publishable Key
+export const sendStripePublishableKey = CatchAsyncError(async(req:Request,res:Response,next:NextFunction)=>{
+    res.status(200).json({
+        publishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
+    })
+})
+
+//new payment
+export const newPayment = CatchAsyncError(async(req:Request,res:Response,next:NextFunction)=>{
+try {
+    const { amount } = req.body;
+    if (!amount || typeof amount !== 'number' || amount <= 0) {
+      return next(new ErrorHandler('Invalid amount provided', 400));
+    }
+    const myPayment = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: "usd",
+        metadata:{
+            company:"KlassConnect"
+        },
+        automatic_payment_methods:{
+            enabled:true,
+        },
+    });
+    res.status(200).json({
+        success:true,
+        client_secret: myPayment.client_secret,
+    })
+} catch (error:any) {
+    return next(new ErrorHandler(error.message, 500));
+    
+}
 })

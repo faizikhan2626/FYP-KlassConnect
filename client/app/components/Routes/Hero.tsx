@@ -2,9 +2,11 @@
 import React from "react";
 import Image from "next/image";
 import { useTheme } from "next-themes";
+import { useGetHeroDataQuery } from "@/redux/features/layout/layoutApi";
 
 const Hero = () => {
   const { theme } = useTheme();
+  const { data } = useGetHeroDataQuery("Banner", {});
 
   return (
     <section className="w-full flex items-center justify-center min-h-[90vh] px-6 md:px-12 lg:px-20">
@@ -12,23 +14,23 @@ const Hero = () => {
         {/* Left Image */}
         <div className="w-full md:w-1/2 flex justify-center">
           <Image
-            src={theme === "dark" ? "/assets/hero.png" : "/assets/hero.png"}
+            src={data?.layout?.banner?.image?.url}
             alt="Hero Image"
-            width={550}
-            height={550}
+            width={500}
+            height={500}
             priority
           />
         </div>
         {/* Right Content */}
         <div className="text-center md:text-left w-full md:w-1/2">
           <h1 className="text-5xl md:text-7xl font-bold text-gray-900 dark:text-white leading-tight">
-            Discover the Future of{" "}
-            <span className="dark:text-[#37a392] text-[crimson]">
-              AI Learning
+            KlassConnect{" "}
+            <span className="text-5xl dark:text-[#37a392] text-[crimson]">
+              "{data?.layout?.banner?.title}"
             </span>
           </h1>
-          <p className="mt-4 text-xl text-gray-600 dark:text-gray-300">
-            Search, Learn, and Connect with KlassConnect.
+          <p className="pt-8 text-l text-gray-600 dark:text-gray-300">
+            {data?.layout?.banner?.subTitle}
           </p>
 
           {/* 🔍 Search Bar */}

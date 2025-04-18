@@ -1,5 +1,5 @@
 import express from 'express';
-import { addAnswer, addQuestion, addReplyToReview, addReview, deleteCourse, editCourse, generateVideoUrl, getAllCourses, getCourseByUser, getSingleCourse, uploadCourse } from '../controllers/course.controller';
+import { addAnswer, addQuestion, addReplyToReview, addReview, deleteCourse, editCourse, generateVideoUrl, getAdminAllCourses, getAllCourses, getCourseByUser, getSingleCourse, uploadCourse } from '../controllers/course.controller';
 import { authorizeRoles, isAuthenticated } from '../middleware/auth';
 import { getAllOrdersServices } from '../services/order.service';
 import { updateAccessToken } from '../controllers/user.controller';
@@ -9,7 +9,8 @@ courseRouter.post("/create-course",updateAccessToken,isAuthenticated,authorizeRo
 courseRouter.put("/edit-course/:id",updateAccessToken,isAuthenticated,authorizeRoles("admin"),editCourse)
 courseRouter.get("/get-course/:id",getSingleCourse)
 courseRouter.get("/get-all-courses",getAllCourses)
-courseRouter.get("/get-course-content/:id",updateAccessToken,isAuthenticated,getCourseByUser)
+courseRouter.get("/get-admin-courses",isAuthenticated,authorizeRoles("admin"),getAdminAllCourses)
+courseRouter.get("/get-course-content/:id", updateAccessToken, isAuthenticated, getCourseByUser);
 courseRouter.put("/add-question",updateAccessToken,isAuthenticated,addQuestion)
 courseRouter.put("/add-answer",updateAccessToken,isAuthenticated,addAnswer)
 courseRouter.put("/add-review/:id",updateAccessToken,isAuthenticated,addReview)

@@ -37,37 +37,50 @@ export const editCourse = CatchAsyncError(async (req: Request, res: Response, ne
     try {
         const data = req.body;
         const thumbnail = data.thumbnail;
+        const courseId = req.params.id;
+        const courseData = await CourseModel.findById(courseId) as { thumbnail?: { public_id: string; url: string } };
 
         if (thumbnail) {
-            await cloudinary.v2.uploader.destroy(thumbnail.public_id);
-            const myCloud = await cloudinary.v2.uploader.upload(thumbnail, {
-                folder: "courses",
-            });
+            // Case 1: New thumbnail is provided (not a Cloudinary URL)
+            if (typeof thumbnail === "string" && !thumbnail.startsWith("https")) {
+                // Delete old thumbnail from Cloudinary
+                if (courseData?.thumbnail?.public_id) {
+                    await cloudinary.v2.uploader.destroy(courseData.thumbnail.public_id);
+                }
+                // Upload new thumbnail
+                const myCloud = await cloudinary.v2.uploader.upload(thumbnail, {
+                    folder: "courses",
+                });
+                data.thumbnail = {
+                    public_id: myCloud.public_id,
+                    url: myCloud.secure_url,
+                };
+            }
 
-            data.thumbnail = {
-                public_id: myCloud.public_id,
-                url: myCloud.secure_url,
-            };
-
+            // Case 2: Thumbnail is a Cloudinary URL (keep existing data)
+            if (typeof thumbnail === "string" && thumbnail.startsWith("https")) {
+                data.thumbnail = {
+                    public_id: (courseData?.thumbnail as { public_id: string })?.public_id,
+                    url: (courseData?.thumbnail as { public_id: string; url: string })?.url,
+                };
+            }
         }
 
-        const courseId = req.params.id;
-        const course = await CourseModel.findByIdAndUpdate(courseId, {
-            $set: data
-        }, {
-            new: true
-
-        });
+        // Update the course
+        const course = await CourseModel.findByIdAndUpdate(
+            courseId,
+            { $set: data },
+            { new: true }
+        );
 
         res.status(201).json({
             success: true,
             course,
-        })
+        });
 
     } catch (error: any) {
-        return next(new ErrorHandler(error.message, 500))
+        return next(new ErrorHandler(error.message, 500));
     }
-
 });
 
 //get single course -- without purchasing
@@ -125,10 +138,17 @@ export const getAllCourses = CatchAsyncError(async (req: Request, res: Response,
 //get course content --- only valid user
 export const getCourseByUser = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
     try {
+
+        if (!req.user) {
+            return next(new ErrorHandler("User not authenticated", 401));
+          }
+      
         const userCourseList = req.user?.courses;
         const courseId = req.params.id;
 
-        const courseExists = userCourseList?.find((course: any) => course._id.toString() === courseId);
+        const courseExists = userCourseList?.some(
+            (course: any) => course.courseId === req.params.id
+          );
 
         if (!courseExists) {
             return next(new ErrorHandler("You are not eligible to access this course", 404));
@@ -141,6 +161,7 @@ export const getCourseByUser = CatchAsyncError(async (req: Request, res: Respons
             success: true,
             content,
         })
+        
 
     } catch (error: any) {
         return next(new ErrorHandler(error.message, 500))
@@ -374,7 +395,7 @@ export const addReplyToReview = CatchAsyncError(async (req: Request, res: Respon
 })
 
 //Get all courses --Admin only
-export const getAllUsers = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
+export const getAdminAllCourses = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
     try {
         getAllCoursesServices(res)
     } catch (error: any) {
