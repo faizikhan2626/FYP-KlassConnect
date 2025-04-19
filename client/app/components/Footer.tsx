@@ -4,10 +4,10 @@ import Link from "next/link";
 const Footer = () => {
   return (
     <footer className="w-full border-t border-gray-300 dark:border-[#ffffff1c] bg-white dark:bg-gradient-to-t dark:from-gray-900 dark:to-black text-black dark:text-white">
-      <div className="max-w-[1200px] mx-auto px-4 py-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 text-sm">
+      <div className="max-w-full mx-auto px-4 py-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 text-sm ">
         {/* Branding */}
         <div>
-          <h2 className="text-xl font-extrabold text-[crimson] dark:text-[#37a392] mb-4">
+          <h2 className="text-[30px] 1000px:text-[40px] font-extrabold text-[crimson] dark:text-[#37a392] mb-4">
             KlassConnect
           </h2>
           <p className="text-gray-600 dark:text-gray-400">

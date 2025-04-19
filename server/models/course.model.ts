@@ -58,7 +58,7 @@ const reviewSchema = new Schema<IReview>({
     },
     comment: String,
     commentReplies:[Object],
-});
+},{timestamps:true});
 
 const linkSchema = new Schema<ILink>({
     title: String,
@@ -69,7 +69,7 @@ const commentSchema = new Schema<IComment>({
     user: Object,
     question: String,
     questionReplies: [Object],
-});
+},{timestamps:true});
 
 const courseDataSchema = new Schema<ICourseData>({
     title: String,
@@ -93,10 +93,10 @@ const courseSchema = new Schema<ICourse>({
          type: String, 
          required: true
          },
-         categories: {
-            type: String,
-            required: [true, "Course category is required"], // ✅ Ensure this matches
-          },
+         categories:{
+            type:String,
+            required:true
+         },
     price: { 
         type: Number, 
         required: true 
