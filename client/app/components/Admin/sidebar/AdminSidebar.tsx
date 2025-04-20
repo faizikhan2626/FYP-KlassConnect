@@ -151,6 +151,7 @@ const Sidebar = () => {
                         : "3px solid crimson "
                     }`,
                   }}
+                  className="w-[150px] h-[150px] object-cover"
                 />
               </Box>
               <Box textAlign="center">

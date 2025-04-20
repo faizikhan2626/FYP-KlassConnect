@@ -251,7 +251,9 @@ export const addAnswer = CatchAsyncError(async (req: Request, res: Response, nex
         //create a new Answer
         const newAnswer: any = {
             user: req.user,
-            answer
+            answer,
+            createdAt: new Date().toISOString(),
+            updatetdAt: new Date().toISOString(),
         };
 
         //add this answer to our course content
@@ -310,7 +312,7 @@ export const addReview = CatchAsyncError(async (req: Request, res: Response, nex
 
         const courseId = req.params.id;
         //check if courseId existsin userCourseList based on _id
-        const courseExists = userCourseList?.some((course: any) => course._id.toString() === courseId.toString());
+        const courseExists = userCourseList?.some((course: any) => course.courseId.toString() === courseId.toString());
 
         if (!courseExists) {
             return next(new ErrorHandler("You are not Eligible to access this course", 404))
@@ -337,13 +339,16 @@ export const addReview = CatchAsyncError(async (req: Request, res: Response, nex
             course.ratings = avg / course.reviews.length;  //calculating average of total reviews
         }
         await course?.save();
-
-        const notification = {
-            title: "New Review Reveived",
-            message: `${req.user?.name} has reviewed on ${course?.name}`,
-        }
+        await redis.set(courseId,JSON.stringify(course),"EX",604800)  //7 days
 
         //create notification
+
+        await NotificationModel.create({
+            user:req.user?._id,
+            title: "New Review Reveived",
+            message: `${req.user?.name} has reviewed on ${course?.name}`,
+        })
+
         res.status(200).json({
             success: true,
             course
@@ -378,6 +383,8 @@ export const addReplyToReview = CatchAsyncError(async (req: Request, res: Respon
         const replyData: any = {
             user: req.user,
             comment,
+            createdAt: new Date().toISOString(),
+            updatetdAt: new Date().toISOString(),
         }
         if( !review.commentReplies){
             review.commentReplies = []

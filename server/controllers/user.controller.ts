@@ -11,6 +11,7 @@ import { accessTokenOptions, refreshTokenOptions, sendToken } from "../utils/jwt
 import { redis } from "../utils/redis";
 import { getAllUsersServices, getUserById, updateUserRoleServices } from "../services/user.service";
 import cloudinary from "cloudinary";
+import { setTimeout } from "timers/promises";
 
 //register User
 interface IRegisterationBody {
@@ -166,7 +167,7 @@ export const logoutUser = CatchAsyncError(async (req: Request, res: Response, ne
         res.cookie("refresh_token", "", { maxAge: 1 });
         const userId = req.user?._id as string;
         await redis.del(userId);
-
+        
         res.status(200).json({
             success: true,
             message: "Logged out Successfully"
